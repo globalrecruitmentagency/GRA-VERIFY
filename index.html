@@ -153,4 +153,423 @@ body {
 
 .footer {
   text-align: center;
-  padding: 22px
+  padding: 22px 15px;
+  color: #777;
+  font-size: 13px;
+}
+
+@media (max-width: 600px) {
+  .container {
+    margin: 20px auto;
+  }
+
+  .header h1 {
+    font-size: 18px;
+  }
+
+  .header img {
+    width: 46px;
+    height: 46px;
+  }
+
+  .row {
+    display: block;
+  }
+
+  .label,
+  .value {
+    width: 100%;
+  }
+
+  .value {
+    margin-top: 5px;
+  }
+
+  .status-banner {
+    font-size: 20px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header class="header">
+
+  <img src="logo.png" alt="GRA">
+
+  <div class="header-title">
+    <h1>GRA DOCUMENT CHECKER</h1>
+    <p>Document Verification</p>
+  </div>
+
+  <button
+    class="close-btn"
+    type="button"
+    onclick="history.back()"
+    aria-label="Close"
+  >×</button>
+
+</header>
+
+<main class="container">
+
+  <div class="verification-card">
+
+    <div id="statusBanner" class="status-banner loading">
+      CHECKING DOCUMENT...
+    </div>
+
+    <div id="content">
+      <div class="message">
+        Please wait while we verify the document.
+      </div>
+    </div>
+
+  </div>
+
+  <div class="reference">
+    This document was verified through the GRA Document Checker.
+  </div>
+
+  <div class="footer">
+    © 2026 GRA DOCUMENT CHECKER
+  </div>
+
+</main>
+
+<script>
+
+/* =========================================
+   SUPABASE CONNECTION
+   ========================================= */
+
+const SUPABASE_URL =
+  'https://zziwqanfrdttlcdolsnd.supabase.co';
+
+const SUPABASE_KEY =
+  'sb_publishable_oYBv99K9xe1KLMBPsjn8uQ_gWNo8iHK';
+
+
+/* =========================================
+   GET DOCUMENT ID FROM QR CODE URL
+   ========================================= */
+
+const params = new URLSearchParams(
+  window.location.search
+);
+
+const documentId =
+  (
+    params.get('id') ||
+    params.get('document_id') ||
+    ''
+  ).trim();
+
+
+const banner =
+  document.getElementById('statusBanner');
+
+const content =
+  document.getElementById('content');
+
+
+/* =========================================
+   SECURITY
+   ========================================= */
+
+function escapeHtml(value) {
+
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+
+}
+
+
+/* =========================================
+   FORMAT DATE
+   ========================================= */
+
+function formatDate(value) {
+
+  if (!value) return '-';
+
+  const parts = value.split('-');
+
+  if (parts.length !== 3) {
+    return value;
+  }
+
+  const date = new Date(
+    Number(parts[0]),
+    Number(parts[1]) - 1,
+    Number(parts[2])
+  );
+
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+
+}
+
+
+/* =========================================
+   INVALID DOCUMENT
+   ========================================= */
+
+function renderInvalid(message) {
+
+  banner.className =
+    'status-banner invalid';
+
+  banner.innerHTML =
+    '<span class="invalid-icon">!</span>' +
+    'INVALID DOCUMENT';
+
+  content.innerHTML =
+    `<div class="message">
+      ${escapeHtml(message)}
+    </div>`;
+
+}
+
+
+/* =========================================
+   DISPLAY DOCUMENT
+   ========================================= */
+
+function renderDocument(doc) {
+
+  const today =
+    new Date().toISOString().slice(0, 10);
+
+  const expired =
+    doc.valid_until &&
+    doc.valid_until < today;
+
+  const storedValid =
+    String(doc.status || '').toUpperCase()
+    === 'VALID DOCUMENT';
+
+  const valid =
+    storedValid && !expired;
+
+
+  if (valid) {
+
+    banner.className =
+      'status-banner valid';
+
+    banner.innerHTML =
+      '<span class="check">✓</span>' +
+      'VALID DOCUMENT';
+
+  } else {
+
+    banner.className =
+      'status-banner invalid';
+
+    banner.innerHTML =
+      '<span class="invalid-icon">!</span>' +
+      (
+        expired
+          ? 'EXPIRED DOCUMENT'
+          : 'INVALID DOCUMENT'
+      );
+
+  }
+
+
+  const displayStatus =
+    valid
+      ? 'VALID DOCUMENT'
+      : expired
+        ? 'EXPIRED DOCUMENT'
+        : (
+            doc.status ||
+            'INVALID DOCUMENT'
+          );
+
+
+  content.innerHTML = `
+
+    <div class="details">
+
+      <div class="row">
+        <div class="label">Status</div>
+        <div class="value">
+          ${escapeHtml(displayStatus)}
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="label">Document Type</div>
+        <div class="value">
+          ${escapeHtml(doc.document_type)}
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="label">Document ID</div>
+        <div class="value">
+          ${escapeHtml(doc.document_id)}
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="label">Issued On</div>
+        <div class="value">
+          ${escapeHtml(formatDate(doc.issued_on))}
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="label">Issued To</div>
+        <div class="value">
+          ${escapeHtml(doc.issued_to)}
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="label">TIN</div>
+        <div class="value">
+          ${escapeHtml(doc.tin)}
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="label">Purpose</div>
+        <div class="value">
+          ${escapeHtml(doc.purpose)}
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="label">Valid Until</div>
+        <div class="value">
+          ${escapeHtml(formatDate(doc.valid_until))}
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="label">Tax Office</div>
+        <div class="value">
+          ${escapeHtml(doc.tax_office)}
+        </div>
+      </div>
+
+    </div>
+
+  `;
+
+}
+
+
+/* =========================================
+   VERIFY DOCUMENT WITH SUPABASE
+   ========================================= */
+
+async function verifyDocument() {
+
+  if (!documentId) {
+
+    renderInvalid(
+      'No Document ID was supplied. ' +
+      'Please scan the QR code on the document.'
+    );
+
+    return;
+  }
+
+
+  try {
+
+    const response = await fetch(
+      `${SUPABASE_URL}/rest/v1/rpc/verify_document`,
+      {
+        method: 'POST',
+
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_KEY,
+          'Authorization':
+            `Bearer ${SUPABASE_KEY}`
+        },
+
+        body: JSON.stringify({
+          p_document_id: documentId
+        })
+      }
+    );
+
+
+    if (!response.ok) {
+
+      const errorText =
+        await response.text();
+
+      console.error(errorText);
+
+      renderInvalid(
+        'We could not complete the verification. ' +
+        'Please try again.'
+      );
+
+      return;
+    }
+
+
+    const data =
+      await response.json();
+
+    const doc =
+      Array.isArray(data)
+        ? data[0]
+        : data;
+
+
+    if (!doc) {
+
+      renderInvalid(
+        'No document with this Document ID ' +
+        'was found in the verification system.'
+      );
+
+      return;
+    }
+
+
+    renderDocument(doc);
+
+  }
+
+  catch (error) {
+
+    console.error(error);
+
+    renderInvalid(
+      'Unable to connect to the verification service. ' +
+      'Please try again.'
+    );
+
+  }
+
+}
+
+
+/* =========================================
+   START VERIFICATION
+   ========================================= */
+
+verifyDocument();
+
+</script>
+
+</body>
+</html>
