@@ -3,216 +3,154 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <link rel="icon" type="image/png" href="logo.png">
-<title>Document Verification | GRA DOCUMENT CHECKER</title>
+<title>GRA DOCUMENT CHECKER</title>
+<link rel="icon" type="image/png" href="logo.png">
 
 <style>
-    * {
-        box-sizing: border-box;
-    }
+* {
+  box-sizing: border-box;
+}
 
-    body {
-        margin: 0;
-        font-family: Arial, Helvetica, sans-serif;
-        background: #f4f7f9;
-        color: #222;
-    }
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f4f7f9;
+  color: #222;
+}
 
-    .header {
-        background: #ffffff;
-        border-bottom: 1px solid #ddd;
-        padding: 18px 20px;
-        text-align: center;
-    }
+.header {
+  background: #fff;
+  border-bottom: 1px solid #ddd;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
 
-    .header h1 {
-        margin: 0;
-        font-size: 24px;
-        color: #17365d;
-    }
+.header img {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
 
-    .header p {
-        margin: 6px 0 0;
-        color: #666;
-        font-size: 14px;
-    }
+.header-title {
+  flex: 1;
+}
 
-    .container {
-        max-width: 720px;
-        margin: 35px auto;
-        padding: 0 16px;
-    }
+.header h1 {
+  margin: 0;
+  font-size: 21px;
+  color: #17365d;
+}
 
-    .verification-card {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-        overflow: hidden;
-    }
+.header p {
+  margin: 4px 0 0;
+  color: #666;
+  font-size: 13px;
+}
 
-    .valid-banner {
-        background: #168a45;
-        color: white;
-        padding: 22px 20px;
-        text-align: center;
-        font-size: 24px;
-        font-weight: bold;
-    }
+.close-btn {
+  border: 0;
+  background: transparent;
+  font-size: 30px;
+  color: #777;
+  cursor: pointer;
+  line-height: 1;
+}
 
-    .check {
-        display: inline-flex;
-        width: 34px;
-        height: 34px;
-        border-radius: 50%;
-        background: white;
-        color: #168a45;
-        align-items: center;
-        justify-content: center;
-        margin-right: 8px;
-        font-size: 22px;
-    }
+.container {
+  max-width: 720px;
+  margin: 28px auto;
+  padding: 0 16px;
+}
 
-    .details {
-        padding: 8px 20px 20px;
-    }
+.verification-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.08);
+  overflow: hidden;
+}
 
-    .row {
-        display: flex;
-        border-bottom: 1px solid #e5e5e5;
-        padding: 15px 5px;
-        gap: 20px;
-    }
+.status-banner {
+  padding: 22px 20px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+}
 
-    .label {
-        width: 38%;
-        font-weight: bold;
-        color: #555;
-    }
+.status-banner.valid {
+  background: #168a45;
+  color: #fff;
+}
 
-    .value {
-        width: 62%;
-        color: #222;
-        word-break: break-word;
-    }
+.status-banner.invalid {
+  background: #b42318;
+  color: #fff;
+}
 
-    .footer {
-        text-align: center;
-        padding: 22px 15px;
-        color: #777;
-        font-size: 13px;
-    }
+.status-banner.loading {
+  background: #667085;
+  color: #fff;
+}
 
-    .reference {
-        text-align: center;
-        color: #555;
-        font-size: 13px;
-        margin-top: 18px;
-    }
+.check,
+.invalid-icon {
+  display: inline-flex;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #fff;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+  font-size: 22px;
+}
 
-    @media (max-width: 600px) {
-        .container {
-            margin: 20px auto;
-        }
+.check {
+  color: #168a45;
+}
 
-        .valid-banner {
-            font-size: 20px;
-        }
+.invalid-icon {
+  color: #b42318;
+}
 
-        .row {
-            display: block;
-        }
+.details {
+  padding: 8px 20px 20px;
+}
 
-        .label,
-        .value {
-            width: 100%;
-        }
+.row {
+  display: flex;
+  border-bottom: 1px solid #e5e5e5;
+  padding: 15px 5px;
+  gap: 20px;
+}
 
-        .value {
-            margin-top: 5px;
-        }
-    }
-</style>
-</head>
+.label {
+  width: 38%;
+  font-weight: bold;
+  color: #555;
+}
 
-<body>
+.value {
+  width: 62%;
+  color: #222;
+  word-break: break-word;
+}
 
-<div class="header">
-    <h1>GLOBAL RECRUITMENT AGENCY</h1>
-    <p>Document Verification Portal</p>
-</div>
+.message {
+  text-align: center;
+  padding: 28px 20px;
+  color: #555;
+}
 
-<div class="container">
+.reference {
+  text-align: center;
+  color: #555;
+  font-size: 13px;
+  margin-top: 18px;
+}
 
-    <div class="verification-card">
-
-        <div class="valid-banner">
-            <span class="check">✓</span>
-            VALID DOCUMENT
-        </div>
-
-        <div class="details">
-
-            <div class="row">
-                <div class="label">Status</div>
-                <div class="value">VALID DOCUMENT</div>
-            </div>
-
-            <div class="row">
-                <div class="label">Document Type</div>
-                <div class="value">Recruitment Document</div>
-            </div>
-
-            <div class="row">
-                <div class="label">Document ID</div>
-                <div class="value">GRA26000001</div>
-            </div>
-
-            <div class="row">
-                <div class="label">Issued On</div>
-                <div class="value">September 19, 2026</div>
-            </div>
-
-            <div class="row">
-                <div class="label">Issued To</div>
-                <div class="value">SAMPLE APPLICANT</div>
-            </div>
-
-            <div class="row">
-                <div class="label">ID / Reference No.</div>
-                <div class="value">GRA-00000001</div>
-            </div>
-
-            <div class="row">
-                <div class="label">Purpose</div>
-                <div class="value">
-                    FOR RECRUITMENT AND EMPLOYMENT VERIFICATION
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="label">Valid Until</div>
-                <div class="value">September 19, 2027</div>
-            </div>
-
-            <div class="row">
-                <div class="label">Issuing Office</div>
-                <div class="value">Global Recruitment Agency</div>
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="reference">
-        This document was verified through the Global Recruitment Agency
-        Document Verification Portal.
-    </div>
-
-    <div class="footer">
-        © 2026 Global Recruitment Agency
-    </div>
-
-</div>
-
-</body>
-</html>
+.footer {
+  text-align: center;
+  padding: 22px
