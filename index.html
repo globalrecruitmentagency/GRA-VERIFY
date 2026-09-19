@@ -240,20 +240,12 @@ body {
 
 <script>
 
-/* =========================================
-   SUPABASE CONNECTION
-   ========================================= */
-
 const SUPABASE_URL =
   'https://zziwqanfrdttlcdolsnd.supabase.co';
 
 const SUPABASE_KEY =
   'sb_publishable_oYBv99K9xe1KLMBPsjn8uQ_gWNo8iHK';
 
-
-/* =========================================
-   GET DOCUMENT ID FROM QR CODE URL
-   ========================================= */
 
 const params = new URLSearchParams(
   window.location.search
@@ -274,10 +266,6 @@ const content =
   document.getElementById('content');
 
 
-/* =========================================
-   SECURITY
-   ========================================= */
-
 function escapeHtml(value) {
 
   return String(value ?? '')
@@ -289,10 +277,6 @@ function escapeHtml(value) {
 
 }
 
-
-/* =========================================
-   FORMAT DATE
-   ========================================= */
 
 function formatDate(value) {
 
@@ -319,10 +303,6 @@ function formatDate(value) {
 }
 
 
-/* =========================================
-   INVALID DOCUMENT
-   ========================================= */
-
 function renderInvalid(message) {
 
   banner.className =
@@ -339,10 +319,6 @@ function renderInvalid(message) {
 
 }
 
-
-/* =========================================
-   DISPLAY DOCUMENT
-   ========================================= */
 
 function renderDocument(doc) {
 
@@ -471,10 +447,6 @@ function renderDocument(doc) {
 }
 
 
-/* =========================================
-   VERIFY DOCUMENT WITH SUPABASE
-   ========================================= */
-
 async function verifyDocument() {
 
   if (!documentId) {
@@ -497,9 +469,7 @@ async function verifyDocument() {
 
         headers: {
           'Content-Type': 'application/json',
-          'apikey': SUPABASE_KEY,
-          'Authorization':
-            `Bearer ${SUPABASE_KEY}`
+          'apikey': SUPABASE_KEY
         },
 
         body: JSON.stringify({
@@ -562,10 +532,6 @@ async function verifyDocument() {
 
 }
 
-
-/* =========================================
-   START VERIFICATION
-   ========================================= */
 
 verifyDocument();
 
