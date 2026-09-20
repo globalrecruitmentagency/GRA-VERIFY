@@ -246,7 +246,6 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
   'sb_publishable_oYBv99K9xe1KLMBPsjn8uQ_gWNo8iHK';
 
-
 const params = new URLSearchParams(
   window.location.search
 );
@@ -258,13 +257,11 @@ const documentId =
     ''
   ).trim();
 
-
 const banner =
   document.getElementById('statusBanner');
 
 const content =
   document.getElementById('content');
-
 
 function escapeHtml(value) {
 
@@ -276,7 +273,6 @@ function escapeHtml(value) {
     .replace(/'/g, '&#039;');
 
 }
-
 
 function formatDate(value) {
 
@@ -302,7 +298,6 @@ function formatDate(value) {
 
 }
 
-
 function renderInvalid(message) {
 
   banner.className =
@@ -319,7 +314,6 @@ function renderInvalid(message) {
 
 }
 
-
 function renderDocument(doc) {
 
   const today =
@@ -335,7 +329,6 @@ function renderDocument(doc) {
 
   const valid =
     storedValid && !expired;
-
 
   if (valid) {
 
@@ -361,7 +354,6 @@ function renderDocument(doc) {
 
   }
 
-
   const displayStatus =
     valid
       ? 'VALID DOCUMENT'
@@ -371,7 +363,6 @@ function renderDocument(doc) {
             doc.status ||
             'INVALID DOCUMENT'
           );
-
 
   content.innerHTML = `
 
@@ -447,11 +438,13 @@ function renderDocument(doc) {
 }
 
 function verifyDocument() {
-  const params = new URLSearchParams(window.location.search);
-  const documentId = params.get('id') || params.get('document_id');
 
   if (!documentId) {
-    renderInvalid('No Document ID was supplied. Please scan the QR code on the document.');
+
+    renderInvalid(
+      'No Document ID was supplied. Please scan the QR code on the document.'
+    );
+
     return;
   }
 
@@ -465,42 +458,93 @@ function verifyDocument() {
 
   xhr.timeout = 15000;
 
-  xhr.setRequestHeader('Content-Type', 'application/json');
-  xhr.setRequestHeader('apikey', SUPABASE_KEY);
+  xhr.setRequestHeader(
+    'Content-Type',
+    'application/json'
+  );
+
+  xhr.setRequestHeader(
+    'apikey',
+    SUPABASE_KEY
+  );
 
   xhr.onload = function () {
-    if (xhr.status >= 200 && xhr.status < 300) {
-      try {
-        const data = JSON.parse(xhr.responseText);
 
-        if (Array.isArray(data) && data.length > 0) {
+    if (xhr.status >= 200 && xhr.status < 300) {
+
+      try {
+
+        const data =
+          JSON.parse(xhr.responseText);
+
+        if (
+          Array.isArray(data) &&
+          data.length > 0
+        ) {
+
           renderDocument(data[0]);
-        } else if (data && typeof data === 'object') {
+
+        } else if (
+          data &&
+          typeof data === 'object'
+        ) {
+
           renderDocument(data);
+
         } else {
-          renderInvalid('Document not found.');
+
+          renderInvalid(
+            'Document not found.'
+          );
+
         }
+
       } catch (error) {
-        renderInvalid('Unable to read the verification response.');
+
+        renderInvalid(
+          'Unable to read the verification response.'
+        );
+
       }
+
     } else {
-      renderInvalid('Unable to connect to the verification service.');
+
+      renderInvalid(
+        'Unable to connect to the verification service.'
+      );
+
     }
+
   };
 
   xhr.onerror = function () {
+
     renderInvalid(
       'Unable to connect to the verification service. Please check your internet connection and try again.'
     );
+
   };
 
   xhr.ontimeout = function () {
+
     renderInvalid(
       'The verification service took too long to respond. Please try again.'
     );
+
   };
 
-  xhr.send(JSON.stringify({
-    p_document_id: documentId
-  }));
+  xhr.send(
+    JSON.stringify({
+      p_document_id: documentId
+    })
+  );
+
 }
+
+/* START VERIFICATION */
+verifyDocument();
+
+</script>
+
+</body>
+</html>
