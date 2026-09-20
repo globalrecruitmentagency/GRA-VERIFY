@@ -460,12 +460,32 @@ async function verifyDocument() {
   }
 
 
+  let timeoutId = null;
+
   try {
+
+    /*
+     * Android fix:
+     * Abort the request if the verification service
+     * does not respond within 15 seconds.
+     */
+    const controller =
+      new AbortController();
+
+    timeoutId =
+      setTimeout(() => {
+        controller.abort();
+      }, 15000);
+
 
     const response = await fetch(
       `${SUPABASE_URL}/rest/v1/rpc/verify_document`,
       {
         method: 'POST',
+
+        signal: controller.signal,
+
+        cache: 'no-store',
 
         headers: {
           'Content-Type': 'application/json',
@@ -479,12 +499,19 @@ async function verifyDocument() {
     );
 
 
+    clearTimeout(timeoutId);
+    timeoutId = null;
+
+
     if (!response.ok) {
 
       const errorText =
         await response.text();
 
-      console.error(errorText);
+      console.error(
+        'Verification service error:',
+        errorText
+      );
 
       renderInvalid(
         'We could not complete the verification. ' +
@@ -521,11 +548,33 @@ async function verifyDocument() {
 
   catch (error) {
 
-    console.error(error);
+    if (timeoutId !== null) {
+      clearTimeout(timeoutId);
+      timeoutId = null;
+    }
+
+
+    console.error(
+      'Document verification error:',
+      error
+    );
+
+
+    if (error && error.name === 'AbortError') {
+
+      renderInvalid(
+        'The verification service took too long ' +
+        'to respond. Please check your internet ' +
+        'connection and try again.'
+      );
+
+      return;
+    }
+
 
     renderInvalid(
       'Unable to connect to the verification service. ' +
-      'Please try again.'
+      'Please check your internet connection and try again.'
     );
 
   }
