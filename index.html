@@ -446,145 +446,61 @@ function renderDocument(doc) {
 
 }
 
-
-async function verifyDocument() {
+function verifyDocument() {
+  const params = new URLSearchParams(window.location.search);
+  const documentId = params.get('id') || params.get('document_id');
 
   if (!documentId) {
-
-    renderInvalid(
-      'No Document ID was supplied. ' +
-      'Please scan the QR code on the document.'
-    );
-
+    renderInvalid('No Document ID was supplied. Please scan the QR code on the document.');
     return;
   }
 
+  const xhr = new XMLHttpRequest();
 
-  let timeoutId = null;
+  xhr.open(
+    'POST',
+    `${SUPABASE_URL}/rest/v1/rpc/verify_document`,
+    true
+  );
 
-  try {
+  xhr.timeout = 15000;
 
-    /*
-     * Android fix:
-     * Abort the request if the verification service
-     * does not respond within 15 seconds.
-     */
-    const controller =
-      new AbortController();
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.setRequestHeader('apikey', SUPABASE_KEY);
 
-    timeoutId =
-      setTimeout(() => {
-        controller.abort();
-      }, 15000);
+  xhr.onload = function () {
+    if (xhr.status >= 200 && xhr.status < 300) {
+      try {
+        const data = JSON.parse(xhr.responseText);
 
-
-    const response = await fetch(
-      `${SUPABASE_URL}/rest/v1/rpc/verify_document`,
-      {
-        method: 'POST',
-
-        signal: controller.signal,
-
-        cache: 'no-store',
-
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': SUPABASE_KEY
-        },
-
-        body: JSON.stringify({
-          p_document_id: documentId
-        })
+        if (Array.isArray(data) && data.length > 0) {
+          renderDocument(data[0]);
+        } else if (data && typeof data === 'object') {
+          renderDocument(data);
+        } else {
+          renderInvalid('Document not found.');
+        }
+      } catch (error) {
+        renderInvalid('Unable to read the verification response.');
       }
-    );
-
-
-    clearTimeout(timeoutId);
-    timeoutId = null;
-
-
-    if (!response.ok) {
-
-      const errorText =
-        await response.text();
-
-      console.error(
-        'Verification service error:',
-        errorText
-      );
-
-      renderInvalid(
-        'We could not complete the verification. ' +
-        'Please try again.'
-      );
-
-      return;
+    } else {
+      renderInvalid('Unable to connect to the verification service.');
     }
+  };
 
-
-    const data =
-      await response.json();
-
-    const doc =
-      Array.isArray(data)
-        ? data[0]
-        : data;
-
-
-    if (!doc) {
-
-      renderInvalid(
-        'No document with this Document ID ' +
-        'was found in the verification system.'
-      );
-
-      return;
-    }
-
-
-    renderDocument(doc);
-
-  }
-
-  catch (error) {
-
-    if (timeoutId !== null) {
-      clearTimeout(timeoutId);
-      timeoutId = null;
-    }
-
-
-    console.error(
-      'Document verification error:',
-      error
-    );
-
-
-    if (error && error.name === 'AbortError') {
-
-      renderInvalid(
-        'The verification service took too long ' +
-        'to respond. Please check your internet ' +
-        'connection and try again.'
-      );
-
-      return;
-    }
-
-
+  xhr.onerror = function () {
     renderInvalid(
-      'Unable to connect to the verification service. ' +
-      'Please check your internet connection and try again.'
+      'Unable to connect to the verification service. Please check your internet connection and try again.'
     );
+  };
 
-  }
+  xhr.ontimeout = function () {
+    renderInvalid(
+      'The verification service took too long to respond. Please try again.'
+    );
+  };
 
+  xhr.send(JSON.stringify({
+    p_document_id: documentId
+  }));
 }
-
-
-verifyDocument();
-
-</script>
-
-</body>
-</html>
